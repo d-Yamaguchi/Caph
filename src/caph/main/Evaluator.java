@@ -1,7 +1,6 @@
 package caph.main;
 
 import java.util.*;
-import java.io.IOException;
 
 public class Evaluator extends CalcVisitor {
 	
@@ -244,6 +243,7 @@ public class Evaluator extends CalcVisitor {
 			System.err.println("you can't do destructive assignment");
 			System.exit(-1);
 		}
+		@SuppressWarnings("resource")
 		Scanner scan = new Scanner(System.in);
 		System.err.println("please input \"" + id + "\"");
 		String in = scan.next();
