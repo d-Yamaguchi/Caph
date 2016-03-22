@@ -257,30 +257,7 @@ class Name extends CalcTree{
 	
 }
 
-/*
-class True extends CalcTree{
-	Boolean bool;
-	public True(Boolean bool){
-		this.bool=bool;
-	}
-	@Override
-	public Object accept(CalcVisitor visitor) {
-		return visitor.visit(this);
-	}
-}
 
-class False extends CalcTree{
-	Boolean bool;
-	public False(Boolean bool) {
-		this.bool= bool;
-	}
-	@Override
-	public Object accept(CalcVisitor visitor) {
-		return visitor.visit(this);
-	}
-	
-}
-*/
 class Bool extends CalcTree{
 	Boolean bool;
 	public Bool(Boolean bool){
