@@ -1,0 +1,5 @@
+func(x) = a + b + x
+		where a = 2 * b + b + x * 3
+			  b = x + x + x
+			  
+cout << func(1)
