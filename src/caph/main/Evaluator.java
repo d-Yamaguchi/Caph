@@ -326,4 +326,14 @@ public class Evaluator extends CalcVisitor {
 		return !Boolean.class.cast(node.child.get(0).accept(this));
 	}
 
+	@Override
+	public Object visit(Monoral_bind node) {
+		return node.child.get(0).accept(this);
+	}
+
+	@Override
+	public Object visit(Parallel_bind node) {
+		return node.child.get(0).accept(this);
+	}
+
 }

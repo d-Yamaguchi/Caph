@@ -58,7 +58,7 @@ public class Translator {
 		case "Int":
 			return new Int(Integer.parseInt(node.toText()));
 		case "Name":
-			return new Name(node.toText());//これで良いのか??toStrとtoTextの違いは?
+			return new Name(node.toText());
 		case "True":
 			return new Bool(Boolean.parseBoolean(node.toText()));
 		case "False":
@@ -67,6 +67,10 @@ public class Translator {
 			return new Minus(translate(node.get(0)));
 		case "Not":
 			return new Not(translate(node.get(0)));
+		case "Parallel_bind":
+			return new Parallel_bind(node.get(0));
+		case "Monoral_bind":
+			return new Monoral_bind(node.get(0));
 		default:
 			break;
 		}

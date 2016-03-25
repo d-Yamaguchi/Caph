@@ -80,6 +80,28 @@ class Vardecl extends BinaryExpr {
 	}
 }
 
+class Monoral_bind extends CalcTree {
+	public Monoral_bind(CommonTree node){
+		this.child.add(Translator.translate(node.get(0)));
+	}
+
+	@Override
+	public Object accept(CalcVisitor visitor) {
+		return visitor.visit(this);
+	}
+}
+
+class Parallel_bind extends CalcTree {
+	public Parallel_bind(CommonTree node){
+		this.child.add(Translator.translate(node.get(0)));
+	}
+
+	@Override
+	public Object accept(CalcVisitor visitor) {
+		return visitor.visit(this);
+	}
+}
+
 class Add extends BinaryExpr {
 
 	public Add(CalcTree left, CalcTree right) {
