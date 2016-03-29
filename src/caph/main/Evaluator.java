@@ -7,6 +7,7 @@ public class Evaluator extends CalcVisitor {
 
 	HashMap<String, Object> record = new HashMap<String, Object>();
 	Boolean record_ref;
+	Boolean paraFlag;
 
 	public Object eval(CalcTree node) {
 		return node.accept(this);
@@ -28,8 +29,12 @@ public class Evaluator extends CalcVisitor {
 		record_ref = false;
 		String id = String.class.cast(node.child.get(0).accept(this));
 		record_ref = true;
-		if (!record.containsKey(id))
+		if (!record.containsKey(id)){
+			paraFlag = true;
+			//単純化メソッド
+			paraFlag = false;
 			record.put(id, node);
+		}
 		else {
 			System.err.println("you can't do destructive assignment");
 			System.exit(-1);
@@ -408,17 +413,21 @@ public class Evaluator extends CalcVisitor {
 
 	@Override
 	public Object visit(Vardecl node) {
-		record_ref = false;
-		String id = String.class.cast(node.child.get(0).accept(this));
-		record_ref = true;
-		Object val = node.child.get(1).accept(this);
-		if (!record.containsKey(id))
-			record.put(id, val);
-		else {
-			System.err.println("you can't do destructive assignment");
-			System.exit(-1);
+		if (paraFlag) {
+			//並列化メソッド
+		} else {
+			record_ref = false;
+			String id = String.class.cast(node.child.get(0).accept(this));
+			record_ref = true;
+			Object val = node.child.get(1).accept(this);
+			if (!record.containsKey(id))
+				record.put(id, val);
+			else {
+				System.err.println("you can't do destructive assignment");
+				System.exit(-1);
+			}
+			return null;
 		}
-		return null;
 	}
 
 	@Override
