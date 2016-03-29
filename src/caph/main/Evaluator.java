@@ -2,6 +2,7 @@ package caph.main;
 
 import java.util.*;
 
+
 public class Evaluator extends CalcVisitor {
 
 	HashMap<String, Object> record = new HashMap<String, Object>();
@@ -99,33 +100,7 @@ public class Evaluator extends CalcVisitor {
 		Funcdecl cnode = Funcdecl.class.cast(node.child.get(0).accept(this));
 		@SuppressWarnings("unchecked")
 		List<CalcTree> arg = (List<CalcTree>) cnode.child.get(1).accept(this);
-		List<Object> arg2_val = new ArrayList<Object>();
 		Object ret;
-		
-		/*
-		for (int i = 0; i < arg2.size(); i++) {
-			arg2_val.add(arg2.get(i).accept(this));
-		}
-
-		record.clear();
-
-		// 新環境の構築
-		record_ref = false;
-
-		// 関数自身を環境に追加
-		record.put(String.class.cast(cnode.child.get(0).accept(this)), cnode);
-
-		// 引数を環境に追加
-		for (int i = 0; i < arg.size(); i++) {
-			String id = String.class.cast(arg.get(i).accept(this));
-			if (!record.containsKey(id))
-				record.put(id, arg2_val.get(i));
-			else {
-				System.err.println("you can't do destructive assignment");
-				System.exit(-1);
-			}
-		}
-		*/
 
 		HashMap<String, Object> buff2 = new HashMap<String, Object>();
 
@@ -166,18 +141,193 @@ public class Evaluator extends CalcVisitor {
 
 	@Override
 	public Object visit(Add node) {
-		Integer left = Integer.class.cast(node.child.get(0).accept(this));
-		Integer right = Integer.class.cast(node.child.get(1).accept(this));
-		return left + right;
+		Object left = node.child.get(0).accept(this);
+		Object right = node.child.get(1).accept(this);
+		if (left instanceof Integer) {
+			if (right instanceof Integer) {
+				//今までのAdd
+				return Integer.class.cast(left) + Integer.class.cast(right);
+			} else if (right instanceof HashMap<?, ?>) {
+				HashMap<LinkedList<String>, Integer> map = (HashMap<LinkedList<String>, Integer>) right;
+				LinkedList<String> key = new LinkedList<String>();
+				key.add("*");
+				map.merge(key, Integer.class.cast(left), (x,y)->x+y);
+				return map;
+			} else if (right instanceof String) {
+				Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
+				LinkedList<String> newRight = new LinkedList<String>();
+				newRight.add(String.class.cast(right));
+				map.put(newRight, 1);
+				newRight.clear();
+				newRight.add("*");
+				map.put(newRight, Integer.class.cast(left));
+				return map;
+			} else {
+				System.err.println("error");
+				return null;
+			}
+		}else if (left instanceof HashMap<?, ?>) {
+			HashMap<LinkedList<String>, Integer> map = (HashMap<LinkedList<String>, Integer>) left;
+			if (right instanceof Integer) {
+				LinkedList<String> key = new LinkedList<String>();
+				key.add("*");
+				map.merge(key, Integer.class.cast(right), (x,y)->x+y);
+				return map;
+			} else if (right instanceof HashMap<?, ?>) {
+				HashMap<LinkedList<String>, Integer> map2 = (HashMap<LinkedList<String>, Integer>) right;
+				for (LinkedList<String> key2 : map2.keySet()) {
+					map.merge(key2, map2.get(key2), (x,y)->x+y);
+				}
+				return map;
+			} else if (right instanceof String) {
+				LinkedList<String> key = new LinkedList<String>();
+				key.add(String.class.cast(right));
+				map.merge(key, 1, (x,y)->x+y);
+				return map;
+			}else {
+				System.err.println("error");
+				return null;
+			}
+		} else if (left instanceof String) {
+			if (right instanceof Integer) {
+				Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
+				LinkedList<String> newLeft = new LinkedList<String>();
+				newLeft.add(String.class.cast(left));
+				map.put(newLeft, 1);
+				newLeft.clear();
+				newLeft.add("*");
+				map.put(newLeft, Integer.class.cast(right));
+				return map;
+			} else if (right instanceof HashMap<?, ?>) {
+				Map<LinkedList<String>, Integer> map = (Map<LinkedList<String>, Integer>) right;
+				LinkedList<String> key = new LinkedList<String>();
+				key.add(String.class.cast(left));
+				map.merge(key, 1, (x,y)->x+y);
+				return map;
+			} else if (right instanceof String) {
+				Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
+				LinkedList<String> key = new LinkedList<String>();
+				key.add(String.class.cast(left));
+				map.put(key, 1);
+				key.clear();
+				key.add(String.class.cast(right));
+				map.put(key, 1);
+				return map;
+			}else {
+				System.err.println("error");
+				return null;
+			}
+		} else {
+			System.err.println("error");
+			return null;
+		}
 	}
 
 	@Override
 	public Object visit(Mul node) {
-		Integer left = Integer.class.cast(node.child.get(0).accept(this));
-		Integer right = Integer.class.cast(node.child.get(1).accept(this));
-		return left * right;
+		Object left = Object.class.cast(node.child.get(0).accept(this));
+		Object right = Object.class.cast(node.child.get(1).accept(this));
+		
+		if (left instanceof Integer) {
+			if (right instanceof Integer) {
+				//今までのMultiple
+				return Integer.class.cast(left) * Integer.class.cast(right);
+			} else if (right instanceof HashMap<?, ?>) {
+				HashMap<LinkedList<String>, Integer> map = (HashMap<LinkedList<String>, Integer>) right;
+				map.forEach((key, value) -> map.merge(key,
+						Integer.class.cast(left),
+						(oldValue, newValue) -> oldValue * newValue));
+				return map;
+			} else if (right instanceof String) {
+				Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
+				LinkedList<String> newRight = new LinkedList<String>();
+				newRight.add(String.class.cast(right));
+				map.put(newRight, Integer.class.cast(left));
+				return map;
+			} else {
+				System.err.println("error");
+				return null;
+			}
+		}else if (left instanceof HashMap<?, ?>) {
+			HashMap<LinkedList<String>, Integer> map = (HashMap<LinkedList<String>, Integer>) left;
+			if (right instanceof Integer) {
+				map.forEach((key, value) -> map.merge(key,
+						Integer.class.cast(right),
+						(oldValue, newValue) -> oldValue * newValue));
+				return map;
+			} else if (right instanceof HashMap<?, ?>) {
+				HashMap<LinkedList<String>, Integer> map2 = (HashMap<LinkedList<String>, Integer>) right;
+				for (LinkedList<String> key : map.keySet()) {
+					if (key.remove("*")) {
+						for (LinkedList<String> key2 : map2.keySet()) {
+							key.addAll(key2);
+							map.merge(key, map2.get(key2), (x,y)->x*y);
+						}
+					} else {
+						for (LinkedList<String> key2 : map2.keySet()) {
+							if (key2.remove("*")) {
+								map.merge(key, map2.get(key2), (x,y)->x*y);
+							} else {
+								key.addAll(key2);
+								map.merge(key, map2.get(key2), (x,y)->x*y);
+								Collections.sort(key);
+							}
+						}
+					}
+				}
+				return map;
+			} else if (right instanceof String) {
+				String newRight = String.class.cast(right);
+				for (LinkedList<String> key : map.keySet()) {
+					if (key.remove("*")) {
+						key.add(newRight);
+					} else {
+						key.add(newRight);
+						Collections.sort(key);
+					}
+				}
+				return map;
+			}else {
+				System.err.println("error");
+				return null;
+			}
+		} else if (left instanceof String) {
+			if (right instanceof Integer) {
+				Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
+				LinkedList<String> newLeft = new LinkedList<String>();
+				newLeft.add(String.class.cast(left));
+				map.put(newLeft, Integer.class.cast(right));
+				return map;
+			} else if (right instanceof HashMap<?, ?>) {
+				HashMap<LinkedList<String>, Integer> map = (HashMap<LinkedList<String>, Integer>) right;
+				String newLeft = String.class.cast(left);
+				for (LinkedList<String> key : map.keySet()) {
+					if (key.remove("*")) {
+						key.add(newLeft);
+					} else {
+						key.add(newLeft);
+						Collections.sort(key);
+					}
+				}
+				return map;
+			} else if (right instanceof String) {
+				Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
+				LinkedList<String> newKey = new LinkedList<String>();
+				newKey.add(String.class.cast(left));
+				newKey.add(String.class.cast(right));
+				Collections.sort(newKey);
+				map.put(newKey, 1);
+				return map;
+			}else {
+				System.err.println("error");
+				return null;
+			}
+		} else {
+			System.err.println("error");
+			return null;
+		}
 	}
-
+	
 	@Override
 	public Object visit(Int node) {
 		return node.val;

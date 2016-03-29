@@ -14,9 +14,8 @@ arglist2 = {$arg2(value) _ (',' _ $arg2(value))* #Arglist2}
 returnlist = { ($return(return) ( ('\r\n' / '\n') $return(return))* ('\r\n' / '\n'))? $othwiseret(othwiseret) #Returnlist}
 return = { _ $(bind) _ '[' _ $retcase(returncase) _ ']' _ #Return}
 othwiseret = { _ $(bind) ( _ '['_ 'otherwise' _ ']' )? #OthwiseRet}
-returncase = exp {$left _ ',' _ $right(exp) #Returncase}*
-whereblock = { ('\r\n' / '\n') _ 'where' _ $declist(declist) #Where}
-declist = (vardecl / funcdecl) {$left _ ('\r\n' / '\n') _ $right( vardecl / funcdecl ) #Declist}*
+returncase = { $case(exp) _ (',' _ $case(exp))* #Returncase}
+whereblock = { ('\r\n' / '\n') _ 'where' ( ('\r\n' / '\n')? _ $declist( vardecl / funcdecl ) _ )* #Where}
 
 //needless
 type = elemtype
