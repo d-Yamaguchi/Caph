@@ -20,9 +20,9 @@ public class Translator {
 		case "OthwiseRet":
 			return new OthwiseRet(translate(node.get(0)));
 		case "Returncase":
-			return new Returncase(translate(node.get(0)), translate(node.get(1)));
+			return new Returncase(node);
 		case "Where":
-			return new Where(translate(node.get(0)));
+			return new Where(node);
 		case "Declist":
 			return new Declist(translate(node.get(0)), translate(node.get(1)));
 		case "FuncCall":
@@ -68,9 +68,9 @@ public class Translator {
 		case "Not":
 			return new Not(translate(node.get(0)));
 		case "Parallel_bind":
-			return new Parallel_bind(node.get(0));
+			return new Parallel_bind(node);
 		case "Monoral_bind":
-			return new Monoral_bind(node.get(0));
+			return new Monoral_bind(node);
 		default:
 			break;
 		}

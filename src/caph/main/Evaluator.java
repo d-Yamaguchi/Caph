@@ -7,6 +7,7 @@ public class Evaluator extends CalcVisitor {
 	HashMap<String, Object> record = new HashMap<String, Object>();
 	Boolean record_ref;
 	Boolean paraFlag = false;
+	Boolean fcFlag = false;
 
 	public Object eval(CalcTree node) {
 		return node.accept(this);
@@ -28,7 +29,7 @@ public class Evaluator extends CalcVisitor {
 		record_ref = false;
 		String id = String.class.cast(node.child.get(0).accept(this));
 		record_ref = true;
-		if (!record.containsKey(id)) {
+		if (!record.containsKey(id) || fcFlag) {
 			CalcTree returnListNode = node.child.get(2);
 			for (int i = 0; i < returnListNode.child.size(); i++) {
 				CalcTree returnNode = returnListNode.child.get(i);
@@ -40,18 +41,22 @@ public class Evaluator extends CalcVisitor {
 				}
 			}
 			//************
-			CalcTree whereNode = node.child.get(3);
-			for (int i = 0; i < whereNode.child.size(); i++) {
-				CalcTree declNode = whereNode.child.get(i);
-				if (declNode.child.get(1) instanceof Parallel_bind) {
-					CalcTree newTree = CalcTree.class.cast(declNode.child
-							.get(1).accept(this));// **
-					declNode.child.set(1, newTree);
-					whereNode.child.set(i, declNode);
-					}
+			if (node.child.size() == 4) {
+				CalcTree whereNode = node.child.get(3);
+				for (int i = 0; i < whereNode.child.size(); i++) {
+					CalcTree declNode = whereNode.child.get(i);
+					if (declNode.child.get(1) instanceof Parallel_bind) {
+						CalcTree newTree = CalcTree.class.cast(declNode.child
+								.get(1).accept(this));// **
+						declNode.child.set(1, newTree);
+						whereNode.child.set(i, declNode);
+						}
+				}
+				node.child.set(3, whereNode);
 			}
 			//************
 			node.child.set(2, returnListNode);
+			
 			record.put(id, node);
 		} else {
 			System.err.println("you can't do destructive assignment 57" + id);
@@ -98,14 +103,19 @@ public class Evaluator extends CalcVisitor {
 
 	@Override
 	public Object visit(Returncase node) {
-		Boolean left = Boolean.class.cast(node.child.get(0).accept(this));
-		Boolean right = Boolean.class.cast(node.child.get(1).accept(this));
-		return left && right;
+		Boolean buff = true;
+		for (int i = 0; i < node.child.size(); i++) {
+			buff &= Boolean.class.cast(node.child.get(i).accept(this)); 
+		}
+		return buff;
 	}
 
 	@Override
 	public Object visit(Where node) {
-		return node.child.get(0).accept(this);
+		for (int i = 0; i < node.child.size(); i++) {
+			node.child.get(i).accept(this);
+		}
+		return null;
 	}
 
 	@Override
@@ -117,6 +127,7 @@ public class Evaluator extends CalcVisitor {
 
 	@Override
 	public Object visit(FuncCall node) {
+		fcFlag = true;
 		HashMap<String, Object> buff = new HashMap<String, Object>(record);
 		@SuppressWarnings("unchecked")
 		List<CalcTree> arg2 = (List<CalcTree>) node.child.get(1).accept(this);
@@ -158,6 +169,7 @@ public class Evaluator extends CalcVisitor {
 		ret = cnode.child.get(2).accept(this);// Return
 
 		record = buff;// 環境を元に戻す
+		fcFlag=false;
 		return ret;
 	}
 
@@ -179,11 +191,12 @@ public class Evaluator extends CalcVisitor {
 				} else if (right instanceof String) {
 					Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
 					LinkedList<String> newRight = new LinkedList<String>();
+					LinkedList<String> newLeft = new LinkedList<String>();
 					newRight.add(String.class.cast(right));
 					map.put(newRight, 1);
-					newRight.clear();
-					newRight.add("*");
-					map.put(newRight, Integer.class.cast(left));
+				    ///
+					newLeft.add("*");
+					map.put(newLeft, Integer.class.cast(left));
 					return map;
 				} else {
 					System.err.println("error");
@@ -205,7 +218,9 @@ public class Evaluator extends CalcVisitor {
 				} else if (right instanceof String) {
 					LinkedList<String> key = new LinkedList<String>();
 					key.add(String.class.cast(right));
+					System.out.println(map);
 					map.merge(key, 1, (x, y) -> x + y);
+					System.out.println(map);
 					return map;
 				} else {
 					System.err.println("error");
@@ -215,11 +230,11 @@ public class Evaluator extends CalcVisitor {
 				if (right instanceof Integer) {
 					Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
 					LinkedList<String> newLeft = new LinkedList<String>();
+					LinkedList<String> newRight = new LinkedList<String>();
 					newLeft.add(String.class.cast(left));
 					map.put(newLeft, 1);
-					newLeft.clear();
-					newLeft.add("*");
-					map.put(newLeft, Integer.class.cast(right));
+					newRight.add("*");
+					map.put(newRight, Integer.class.cast(right));
 					return map;
 				} else if (right instanceof HashMap<?, ?>) {
 					Map<LinkedList<String>, Integer> map = (Map<LinkedList<String>, Integer>) right;
@@ -229,12 +244,13 @@ public class Evaluator extends CalcVisitor {
 					return map;
 				} else if (right instanceof String) {
 					Map<LinkedList<String>, Integer> map = new HashMap<LinkedList<String>, Integer>();
-					LinkedList<String> key = new LinkedList<String>();
-					key.add(String.class.cast(left));
-					map.put(key, 1);
-					key.clear();
-					key.add(String.class.cast(right));
-					map.put(key, 1);
+					LinkedList<String> key1 = new LinkedList<String>();
+					LinkedList<String> key2 = new LinkedList<String>();
+					key1.add(String.class.cast(left));
+					map.put(key1, 1);
+					
+					key2.add(String.class.cast(right));
+					map.merge(key2, 1, (x, y) -> x + y);
 					return map;
 				} else {
 					System.err.println("error");
@@ -493,11 +509,12 @@ public class Evaluator extends CalcVisitor {
 		if (record.containsKey(node.str) && record_ref) {
 			Object value = record.get(node.str);
 			if (value instanceof CalcTree) {
+				System.out.println("koko");
 				record.replace(node.str, ((CalcTree) value).accept(this));
 			}
-			return value;
+			return record.get(node.str);
 		}
-		System.out.println(node.str + record.entrySet());
+		//System.out.println(node.str + record.entrySet() + node);
 		return node.str;
 	}
 
@@ -522,27 +539,29 @@ public class Evaluator extends CalcVisitor {
 	}
 
 	@Override
-	public CalcTree visit(Parallel_bind node) {
+	public Object visit(Parallel_bind node) {
 		paraFlag = true;
 		Object nodeZero = node.child.get(0).accept(this);
 		if (nodeZero instanceof Integer) {
-			CalcTree newTree = new Int(Integer.class.cast(nodeZero));
 			paraFlag = false;
-			return newTree;
+			return Integer.class.cast(nodeZero);
 		} else {
 			HashMap<LinkedList<String>, Integer> expressionData = (HashMap<LinkedList<String>, Integer>) nodeZero;
 			LinkedList<CalcTree> tree2add = new LinkedList<CalcTree>();
+			System.out.println(expressionData);
 			for (LinkedList<String> key : expressionData.keySet()) {
 				if (key.size() == 1) {
 					if (String.class.cast(key.get(0)).equals("*")) {
 						CalcTree value = new Int(
 								Integer.class.cast(expressionData.get(key)));
+						System.out.println("ほ" + Integer.class.cast(expressionData.get(key)));
 						tree2add.add(value);
 					} else {
 						CalcTree left = new Name(String.class.cast(key.get(0)));
 						CalcTree right = new Int(
 								Integer.class.cast(expressionData.get(key)));
 						CalcTree newMul = new Mul(left, right);
+						System.out.println(String.class.cast(key.get(0)) + "," + Integer.class.cast(expressionData.get(key)) );
 						tree2add.add(newMul);
 					}
 				} else {
@@ -554,14 +573,18 @@ public class Evaluator extends CalcVisitor {
 							CalcTree right = new Name(String.class.cast(key
 									.get(i + 1)));
 							newMul = new Mul(left, right);
+							System.out.println(key + "," + key.get(i) );
 							i++;
 						} else {
 							CalcTree right = new Name(String.class.cast(key
 									.get(i)));
 							newMul = new Mul(newMul, right);
+							System.out.println(key + "," + key.get(i) );
 						}
 					}
 					CalcTree val = new Int(Integer.class.cast(expressionData
+							.get(key)));
+					System.out.println(Integer.class.cast(expressionData
 							.get(key)));
 					newMul = new Mul(newMul, val);
 					tree2add.add(newMul);

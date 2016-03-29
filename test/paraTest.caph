@@ -1,5 +1,5 @@
-func(x) = a + b + x
-		where a = 2
-			  b ~= 3 + a + a
-			  
-cout << func(1)
+b ~= a + a+ a + a + a+ a+ a+ a+ a+ a+ a+ a+ a+ a
+
+a = 1
+
+cout << b

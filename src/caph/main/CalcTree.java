@@ -342,20 +342,26 @@ class OthwiseRet extends CalcTree{
 	}
 }
 
-class Returncase extends BinaryExpr{
-	public Returncase(CalcTree left, CalcTree right){
-		super(left,right);
+class Returncase extends CalcTree{
+	public Returncase(CommonTree node){
+		super();
+		for (int i = 0; i < node.size(); i++) {
+		this.child.add(Translator.translate(node.get(i)));
+		}
 	}
-
 	@Override
 	public Object accept(CalcVisitor visitor) {
 		return visitor.visit(this);
 	}
 }
 
+
 class Where extends CalcTree{
-	public Where(CalcTree ret){
-		this.child.add(ret);
+	public Where(CommonTree node){
+		super();
+		for (int i = 0; i < node.size(); i++) {
+		this.child.add(Translator.translate(node.get(i)));
+		}
 	}
 	@Override
 	public Object accept(CalcVisitor visitor) {

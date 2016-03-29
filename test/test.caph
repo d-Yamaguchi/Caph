@@ -1,7 +1,4 @@
-c = 5
-
-cin >> b
-
-a = 2
-
-cout << c + a + b
+func(x)  ~= x+y
+	where y ~= x+x+x
+	
+cout << func(1)
