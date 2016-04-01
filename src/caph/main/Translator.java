@@ -10,8 +10,10 @@ public class Translator {
 		case "Funcdecl":
 			return new Funcdecl(node);
 		case "Arglist":
+		case "Bindlist":
 			return new Arglist(node);
 		case "Arglist2":
+		case "Lambda_arglist":
 			return new Arglist2(node);
 		case "Returnlist":
 			return new Returnlist(node);
@@ -68,9 +70,17 @@ public class Translator {
 		case "Not":
 			return new Not(translate(node.get(0)));
 		case "Parallel_bind":
+		case "Parallel_lambda":
 			return new Parallel_bind(node);
 		case "Monoral_bind":
+		case "Monoral_lambda":
 			return new Monoral_bind(node);
+		case "Lambda":
+			return new Lambda(translate(node.get(0)),translate(node.get(1)), translate(node.get(2)));
+		//case "Monoral_lambda":
+		//	return new Monoral_lambda(translate(node.get(0)));
+		//case "Parallel_lambda":
+		//	return new Parallel_lambda(translate(node.get(0)));
 		default:
 			break;
 		}

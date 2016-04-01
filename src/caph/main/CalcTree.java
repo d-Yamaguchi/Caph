@@ -410,3 +410,37 @@ class Not extends CalcTree{
 		return visitor.visit(this);
 	}
 }
+
+class Lambda extends CalcTree{
+	public Lambda(CalcTree first, CalcTree second, CalcTree third){
+		this.child.add(first);
+		this.child.add(second);
+		this.child.add(third);
+	}
+	@Override
+	public Object accept(CalcVisitor visitor) {
+		return visitor.visit(this);
+	}
+}
+
+/*
+class Monoral_lambda extends CalcTree{
+	public Monoral_lambda(CalcTree ret){
+		this.child.add(ret);
+	}
+	@Override
+	public Object accept(CalcVisitor visitor) {
+		return visitor.visit(this);
+	}
+}
+
+class Parallel_lambda extends CalcTree{
+	public Parallel_lambda(CalcTree ret){
+		this.child.add(ret);
+	}
+	@Override
+	public Object accept(CalcVisitor visitor) {
+		return visitor.visit(this);
+	}
+}
+*/

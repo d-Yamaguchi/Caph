@@ -65,7 +65,9 @@ public abstract class CalcVisitor {
 	public abstract Object visit(Bool node);//trueとfalseを統合
 	
 	//Lambda expression
-	//public abstract Object visit(Lambda node);
+	public abstract Object visit(Lambda node);
 	
-	//public abstract Object visit(BinderList node);
+	//public abstract Object visit(Monoral_lambda node);
+	
+	//public abstract Object visit(Parallel_lambda node);
 }
