@@ -17,7 +17,7 @@ ArgList2 = {$arg2(Value) _ (',' _ $arg2(Value))* #Arglist2}
 ReturnList = { ($return(Return) ( ('\r\n' / '\n') $return(Return))* ('\r\n' / '\n'))? $othwiseret(OthwiseRet) #Returnlist}
 Return = { _ $(Bind) _ '[' _ $retcase(ReturnCase) _ ']' _ #Return}
 OthwiseRet = { _ $(Bind) ( _ '['_ 'otherwise' _ ']' )? #OthwiseRet}
-ReturnCase = exp {$left _ ',' _ $right(Exp) #Returncase}*
+ReturnCase = Exp {$left _ ',' _ $right(Exp) #Returncase}*
 WhereBlock = { ('\r\n' / '\n') _ 'where' _ $declist(DecList) #Where}
 DecList = (VarDecl / FuncDecl) {$left _ ('\r\n' / '\n') _ $right( VarDecl / FuncDecl ) #Declist}*
 
@@ -36,11 +36,11 @@ Value = Exp
 //VarDecl tree
 VarDecl = { $name(Name) _ $(Bind) #Vardecl}
 
-Exp = exp0 {$left ( _ ('&&' #And / '||' #Or) _ $right(Exp0)) }*
-Exp0 = exp1 {$left ( _ ('==' #Equals / '!=' #NotEquals) _ $right(Exp1)) }*
-Exp1 = exp6 {$left ( _ ('<=' #LessThanEquals / '<' #LessThan / '>=' #GreaterThanEquals / '>' #GreaterThan) _ $right(Exp6)) }*
-Exp6 = exp7 {$left ( _ ('+' #Add / '-' #Sub) _ $right(Exp7)) }*
-Exp7 = exps {$left ( _ ('*' #Mul) _ $right(ExpS)) }*
+Exp = Exp0 {$left ( _ ('&&' #And / '||' #Or) _ $right(Exp0)) }*
+Exp0 = Exp1 {$left ( _ ('==' #Equals / '!=' #NotEquals) _ $right(Exp1)) }*
+Exp1 = Exp6 {$left ( _ ('<=' #LessThanEquals / '<' #LessThan / '>=' #GreaterThanEquals / '>' #GreaterThan) _ $right(Exp6)) }*
+Exp6 = Exp7 {$left ( _ ('+' #Add / '-' #Sub) _ $right(Exp7)) }*
+Exp7 = ExpS {$left ( _ ('*' #Mul) _ $right(ExpS)) }*
 ExpS =  '(' _ Exp _ ')'
      / Nil
      / False
